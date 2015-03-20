@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <locale.h>
-#define STR_SIZE 1024
+#define STR_SIZE 512
 
 char *execfile;
 int count_dir = 0;
@@ -27,7 +27,7 @@ void getprop(struct stat buf, char *filepath)
 	struct 	tm lt;
 	string=(char *)malloc(sizeof(char)*STR_SIZE);
 	localtime_r(&buf.st_mtime,&lt);
-	strftime(string, sizeof(char*)*STR_SIZE, "%c", &lt);
+	strftime(string, sizeof(char*)*STR_SIZE, "%d %b %Y", &lt);
 					
 	fprintf(file,"%s %ld %lo %ld %s\n", 
 		filepath, buf.st_size, (unsigned long)buf.st_mode,
@@ -139,7 +139,12 @@ int findindir(char *folder, char *filename, int *file_exist)
 		return errno;
 	}
 	
-	closedir(dfd);
+	if (closedir(dfd) == -1)
+	{
+		fprintf(stderr, "%s : %s : %s!\n", execfile, strerror(errno), realpath(folder,fullpath));
+		return errno;
+	}
+
 	free(fullpath);
 	free(filepath);
 }
@@ -196,6 +201,6 @@ int main(int argc, char *argv[])
 	else 
 		fprintf(stderr, "%s : File doesn't exist\n", execfile);
 	
-	printf("Directories: %d; Files: %d\n", count_dir, count_files);
+	printf("%d %d\n", count_dir, count_files);
 	return 0;
 }
